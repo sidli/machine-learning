@@ -1,0 +1,18 @@
+import numpy as np 
+
+def circs():
+	X = np.zeros((2, 100))
+	y = 0
+
+	i_s = np.arange(0, 2*np.pi, np.pi/25.0)
+
+	for i in i_s:
+		X[0, y] = np.cos(i)
+		X[1, y] = np.sin(i)
+		y += 1
+
+	for i in i_s:
+		X[0, y] = 2*np.cos(i)
+		X[1, y] = 2*np.sin(i)
+		y += 1
+	return X

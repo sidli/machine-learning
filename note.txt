@@ -1,0 +1,4 @@
+The set of hypotheses consistent with the training data T is 𝜖-exhausted if, when you test them on the actual distribution of instances, all consistent hypotheses have error below 𝜖
+
+(at least one bad looks good) < H * e ^ (- 𝜖 * M)
+(bad looks at least one good) < H * e ^ (- 𝜖 * M)

@@ -1,0 +1,93 @@
+#!/usr/bin/python
+import random
+# The purpose of this program is try to use Binary Classification to learn out that line y = x divide coordinate system, 
+# Refer Omeed's Gradient Descent program
+
+# The Pre-processed Training Sets
+trainingSetX = []
+trainingSetY = []
+expectingSetX = []
+expectingSetY = []
+realSetY = []
+length = 100
+
+def init_data():
+    global trainingSetX,trainingSetY,expectingSetX,expectingSetY,realSetY
+    for i in range(length):
+        x1 = random.randint(0,10000)
+        x2 = random.randint(0,10000)
+        # Two dimensions training data
+        trainingSetX.append([x1,x2])
+        trainingSetY.append(1 if x1>x2 else -1)
+    #expectingSet's size is 1/10 of trainingSet's size
+    for i in range(int(length/10)):
+        x1 = random.randint(0,10000)
+        x2 = random.randint(0,10000)
+        expectingSetX.append([x1,x2])
+        realSetY.append(1 if x1>x2 else -1)
+
+# Function: Calculate the Sum of Squares Error (SSE)
+def Calculate_SSE(y1, y2):
+    if len(y1) != len(y2):
+        print(len(y1),len(y2)," Different Length Error")
+        exit(1)
+    sumOfSquares = 0.0
+    for i in range(len(y1)):
+        sumOfSquares += (y1[i] - y2[i])**2
+    return (sumOfSquares / length)
+
+# Function: Calculate the Linear function parameters a and b (SSE)
+# In order to use Binary Classification, we will need various tools/formulas
+#    Solve a,b respectively with follow formula for their derivative: aT means vector a's vector transpose
+#        perception_loss  = 1/M SUM MAX(0, -y^(m)(aT * x^(m) +b))
+#        derivative(a^(t) = 1/M SUM - y^(m) * x^(m)
+#        derivative(b^(t) = 1/M SUM - y^(m)
+#        a^(t+1) = a^(t) - step_size * (derivative(a^(t))
+#        b^(t+1) = a^(t) - step_size * (derivative(b^(t))
+def Calculate_a_b(x,y,aT,b,step_size):
+    sumOfDeriv_aT = [0.0, 0.0]; averageOfDeriv_aT = [0.0, 0.0];
+    sumOfDeriv_b = 0.0
+    # The formula for deriv(a ^ (t)) is 1/M SUM 2 * (a * x^(m) + b - y^(m)) * x^(m)
+    for i in range(length):
+        orig_value = - y[i] * (x[i][0] * aT[0] + x[i][1] * aT[1] + b)
+        if orig_value < 0:
+            continue
+        sumOfDeriv_aT[0] += - y[i] * x[i][0]
+        sumOfDeriv_aT[1] += - y[i] * x[i][1]
+        sumOfDeriv_b += - y[i]
+    averageOfDeriv_aT[0] = sumOfDeriv_aT[0] / length
+    averageOfDeriv_aT[1] = sumOfDeriv_aT[1] / length
+    averageOfDeriv_b = sumOfDeriv_b / length
+    aT[0] = aT[0] - step_size * averageOfDeriv_aT[0]
+    aT[1] = aT[1] - step_size * averageOfDeriv_aT[1]
+    b = b - (step_size * averageOfDeriv_b)
+    return aT, b, averageOfDeriv_aT[0] * averageOfDeriv_aT[1], averageOfDeriv_b
+
+def main():
+    # The Weights for the Gradient Descent Random numbers(random initial numbers), y = a*x + b, grada and gradb for the change of a and b
+    global trainingSetX,trainingSetY,expectingSetX,expectingSetY,realSetY
+    init_data()
+    aT = [random.uniform(0,10),random.uniform(0,10)]; b = random.uniform(0,10);
+    grada = 1.0; gradb = 1.0
+    epsilon = 0.00001
+    step = 1; step_size = 0.001
+    #while grada**2 + gradb**2 > epsilon:
+    print(aT," ",b," ",grada, " ", gradb, " ", step, " ", step_size)
+    #there are several methods to terminate the recurrence. At here when the tangent line smooth enough, we think I get the x0
+    while grada**2 * gradb**2 / (step_size**2) > epsilon:
+        step += 1
+        aT,b,grada,gradb = Calculate_a_b(trainingSetX,trainingSetY,aT,b,step_size)
+        #if step%1000 == 0: 
+        print(aT," ",b," ",grada, " ", gradb, " ", step, " ", step_size)
+    for i in expectingSetX:
+        expectingSetY.append(1 if aT[0]*i[0] + aT[1]*i[1] + b > 0 else -1)
+    print("aT:%f %f b:%f"%(aT[0],aT[1],b))
+    print("Training Set X",trainingSetX)
+    print("Training Set Y",trainingSetY)
+    print("Actual result:", realSetY)
+    print("Expecting result:", expectingSetY)
+    print("Sum of Squares Error:", Calculate_SSE(expectingSetY,realSetY))
+    exit(0)
+
+if __name__ == "__main__":
+    main()
